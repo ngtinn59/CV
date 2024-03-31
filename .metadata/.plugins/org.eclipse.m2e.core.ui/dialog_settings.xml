@@ -35,6 +35,12 @@
 	</section>
 	<section name="wizardPage">
 		<list key="groupId">
+			<item value="SkillsServiceRestProject"/>
+			<item value="ExperiencesServiceRestProject"/>
+			<item value="CertificatesServiceRestProject"/>
+			<item value="AwardsServiceRestProject"/>
+			<item value="AboutmeServiceRestProject"/>
+			<item value="EducationServiceRestProject"/>
 			<item value="CRUD"/>
 			<item value="StudentServiceRestProject"/>
 			<item value="CalServiceRestProject"/>
@@ -43,6 +49,12 @@
 		<list key="name">
 		</list>
 		<list key="artifactId">
+			<item value="SkillsServiceRestProject"/>
+			<item value="ExperiencesServiceRestProject"/>
+			<item value="CertificatesServiceRestProject"/>
+			<item value="AwardsServiceRestProject"/>
+			<item value="AboutmeServiceRestProject"/>
+			<item value="EducationServiceRestProject"/>
 			<item value="CRUD"/>
 			<item value="StudentServiceRestProject"/>
 			<item value="CalServiceRestProject"/>

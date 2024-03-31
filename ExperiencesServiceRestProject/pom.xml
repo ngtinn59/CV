@@ -24,4 +24,16 @@
       </plugin>
     </plugins>
   </build>
+  <dependencies>
+	<dependency>
+	    <groupId>org.postgresql</groupId>
+	    <artifactId>postgresql</artifactId>
+	    <version>42.7.3</version>
+	</dependency>
+	<dependency>
+    <groupId>io.jsonwebtoken</groupId>
+    <artifactId>jjwt</artifactId>
+    <version>0.9.1</version>
+</dependency>
+  </dependencies>
 </project>
