@@ -1,0 +1,84 @@
+package cit.ctu;
+
+import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
+
+public class KhachHangDatabase {
+
+    private Connection conn = null;
+
+    public KhachHangDatabase() {
+        String userName = "postgres";
+        String password = "123";
+        try {
+            Class.forName("org.postgresql.Driver");
+            conn = DriverManager.getConnection("jdbc:postgresql://localhost:5432/cse", userName, password);
+            System.out.println("Ket noi thanh cong!");
+        } catch (Exception e) {
+            System.out.println("Kết nối đến cơ sở dữ liệu thất bại: " + e.getMessage());
+        }
+    }
+
+    public void addKhachHang(KhachHang khachHang) throws SQLException {
+        String sql = "INSERT INTO khach_hang (mso, hoten, diachi, gtinh) VALUES (?, ?, ?, ?)";
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, khachHang.getMso());
+            pstmt.setString(2, khachHang.getHoten());
+            pstmt.setString(3, khachHang.getDiachi());
+            pstmt.setBoolean(4, khachHang.getGtinh());
+            pstmt.executeUpdate();
+        }
+    }
+
+    public void updateKhachHang(KhachHang khachHang) throws SQLException {
+        String sql = "UPDATE khach_hang SET hoten=?, diachi=?, gtinh=? WHERE mso=?";
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, khachHang.getHoten());
+            pstmt.setString(2, khachHang.getDiachi());
+            pstmt.setBoolean(3, khachHang.getGtinh());
+            pstmt.setInt(4, khachHang.getMso());
+            pstmt.executeUpdate();
+        }
+    }
+
+    public void deleteKhachHang(int mso) throws SQLException {
+        String sql = "DELETE FROM khach_hang WHERE mso=?";
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, mso);
+            pstmt.executeUpdate();
+        }
+    }
+
+    public List<KhachHang> getAllKhachHang() throws SQLException {
+        List<KhachHang> khachHangList = new ArrayList<>();
+        String sql = "SELECT * FROM khach_hang";
+        try (Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
+            while (rs.next()) {
+                int mso = rs.getInt("mso");
+                String hoten = rs.getString("hoten");
+                String diachi = rs.getString("diachi");
+                Boolean gtinh = rs.getBoolean("gtinh");
+                khachHangList.add(new KhachHang(mso, hoten, diachi, gtinh));
+            }
+        }
+        return khachHangList;
+    }
+
+    public KhachHang findKhachHangByMso(int mso) throws SQLException {
+        String sql = "SELECT * FROM khach_hang WHERE mso=?";
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, mso);
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    String hoten = rs.getString("hoten");
+                    String diachi = rs.getString("diachi");
+                    Boolean gtinh = rs.getBoolean("gtinh");
+                    return new KhachHang(mso, hoten, diachi, gtinh);
+                }
+            }
+        }
+        return null;
+    }
+}

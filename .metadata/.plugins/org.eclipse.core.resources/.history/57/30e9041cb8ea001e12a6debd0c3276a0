@@ -1,0 +1,28 @@
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
+
+@POST
+@Path("/register")
+@Consumes(MediaType.APPLICATION_JSON)
+public Response registerUser(User user) {
+    if (repository.getUserByEmail(user.getEmail()) != null) {
+        JsonObject jsonError = Json.createObjectBuilder()
+                .add("error", "Email đã được sử dụng")
+                .build();
+        return Response.status(Response.Status.BAD_REQUEST).entity(jsonError).build();
+    }
+    repository.insertUser(user);
+
+    // Tạo một token
+    String token = Jwts.builder()
+            .setSubject(user.getEmail())
+            .signWith(SignatureAlgorithm.HS256, "khoá bí mật của bạn")
+            .compact();
+
+    JsonObject jsonResponse = Json.createObjectBuilder()
+            .add("message", "Đăng ký thành công")
+            .add("token", token)
+            .build();
+
+    return Response.ok().entity(jsonResponse).build();
+}

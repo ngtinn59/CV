@@ -1,0 +1,35 @@
+package ctu.cit;
+
+import javax.json.Json;
+import javax.json.JsonObject;
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+
+@Path("/authenticated-url")
+public class ProjectResource {
+
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getHelloMessage() {
+        // Kiểm tra xác thực tại đây, ví dụ:
+         if (!isAuthenticated()) {
+             return Response.status(Response.Status.UNAUTHORIZED).build();
+         }
+
+        // Trả về một JSON chứa thông điệp "hello"
+        JsonObject jsonResponse = Json.createObjectBuilder()
+                .add("message", "hello")
+                .build();
+
+        return Response.ok().entity(jsonResponse).build();
+    }
+
+    // Hàm kiểm tra xác thực, bạn cần thay thế bằng logic kiểm tra xác thực thực tế
+    private boolean isAuthenticated() {
+        // Thực hiện logic kiểm tra xác thực ở đây
+        return true;
+    }
+}

@@ -1,0 +1,66 @@
+import io.jsonwebtoken.Jws;
+import io.jsonwebtoken.JwtException;
+import io.jsonwebtoken.Jwts;
+import javax.ws.rs.HeaderParam;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
+import javax.ws.rs.GET;
+import javax.ws.rs.PUT;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.HttpHeaders;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+
+@Path("/profiles")
+public class ProjectResource {
+    private UserResponsitory repository = new UserResponsitory();
+
+    // GET all profiles
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getProfiles() {
+        // Implement your logic to retrieve all profiles from the repository
+        // and return a JSON response
+    }
+
+    // GET a profile by ID
+    @GET
+    @Path("/{id}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getProfileById(@PathParam("id") String id) {
+        // Implement your logic to retrieve a profile by ID from the repository
+        // and return a JSON response
+    }
+
+    // POST a new profile
+    @POST
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response createProfile(@Context HttpHeaders headers, Profile newProfile) {
+        // Implement your logic to create a new profile using the provided data
+        // and return a JSON response
+    }
+
+    // PUT (update) a profile by ID
+    @PUT
+    @Path("/{id}")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response updateProfile(@Context HttpHeaders headers, @PathParam("id") String id, Profile updatedProfile) {
+        // Implement your logic to update an existing profile by ID using the provided data
+        // and return a JSON response
+    }
+
+    // DELETE a profile by ID
+    @DELETE
+    @Path("/{id}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response deleteProfile(@PathParam("id") String id) {
+        // Implement your logic to delete a profile by ID from the repository
+        // and return a JSON response
+    }
+}

@@ -1,0 +1,85 @@
+package ctu.cit;
+
+import java.sql.Connection;
+import java.sql.Date;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.List;
+
+public class EducationRepository {
+
+    Connection conn = null;
+
+    public EducationRepository() {
+        String user_name = "postgres";
+        String password = "123";
+        try {
+            Class.forName("org.postgresql.Driver");
+            conn = DriverManager.getConnection("jdbc:postgresql://localhost:5432/cse", user_name, password);
+            System.out.println("Ket noi thanh cong!");
+        } catch (Exception e) {
+            System.out.println("Kết nối đến cơ sở dữ liệu thất bại: " + e.getMessage());
+        }
+    }
+
+    public Education insertEducation(Education education, int profilesId) {
+        String sql = "INSERT INTO public.educations(" +
+                "degree, institution, start_date, end_date, additionaldetail, profiles_id)" +
+                "VALUES (?, ?, ?, ?, ?, ?)" +
+                "RETURNING *";
+        try (PreparedStatement pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+            pstmt.setString(1, education.getDegree());
+            pstmt.setString(2, education.getInstitution());
+            pstmt.setString(3,  education.getStartDate());
+            pstmt.setString(4,  education.getEndDate());
+            pstmt.setString(5, education.getAdditionalDetail());
+            pstmt.setInt(6, profilesId);
+
+            int affectedRows = pstmt.executeUpdate();
+            if (affectedRows == 0) {
+                throw new SQLException("Insertion failed, no rows affected.");
+            }
+
+            try (ResultSet rs = pstmt.getGeneratedKeys()) {
+                if (rs.next()) {
+                    int id = rs.getInt(1);
+                    education.setId(id);
+                    return education;
+                } else {
+                    throw new SQLException("Insertion failed, no ID obtained.");
+                }
+            }
+        } catch (SQLException e) {
+            System.out.println("Error while inserting education into the database: " + e.getMessage());
+            return null;
+        }
+    }
+    
+  
+        public static void main(String[] args) {
+            EducationRepository repo = new EducationRepository();
+
+            // Create an instance of Education
+            Education education = new Education();
+            education.setDegree("Bachelor of Science");
+            education.setInstitution("University of Somewhere");
+            education.setStartDate(new java.util.Date());
+            education.setEndDate(new java.util.Date());
+            education.setAdditionalDetail("Some additional detail");
+
+            // Insert the education into the database
+            int profilesId = 1; // replace with the actual profile ID
+            Education insertedEducation = repo.insertEducation(education, profilesId);
+
+            if (insertedEducation != null) {
+                System.out.println("Education inserted successfully: " + insertedEducation);
+            } else {
+                System.out.println("Failed to insert education.");
+            }
+        }
+    }
+

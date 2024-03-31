@@ -1,0 +1,93 @@
+package ctu.cit;
+
+
+import javax.ws.rs.HeaderParam;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.json.Json;
+import javax.json.JsonObject;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
+import javax.ws.rs.GET;
+import javax.ws.rs.PUT;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.HttpHeaders;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+
+@Path("/projects")
+public class ProjectRespone {
+  private ProjectRepository repository = new ProjectRepository();
+
+  @POST
+  @Consumes(MediaType.APPLICATION_JSON)
+  @Produces(MediaType.APPLICATION_JSON)
+  public Response createProject(@Context HttpHeaders headers, Projects newProject) {
+    String token = headers.getHeaderString("Authorization");
+
+    if (token == null || !isValidToken(token)) {
+      JsonObject jsonError = Json.createObjectBuilder()
+          .add("error", "Unauthorized access")
+          .build();
+      return Response.status(Response.Status.UNAUTHORIZED).entity(jsonError).build();
+    }
+
+    int profileId = extractProfileIdFromToken(token);
+    if (profileId <= 0) {
+      JsonObject jsonError = Json.createObjectBuilder()
+          .add("error", "Invalid token: No profile ID found")
+          .build();
+      return Response.status(Response.Status.BAD_REQUEST).entity(jsonError).build();
+    }
+
+    if (!validateProject(newProject)) {
+      JsonObject jsonError = Json.createObjectBuilder()
+          .add("error", "Invalid project data")
+          .build();
+      return Response.status(Response.Status.BAD_REQUEST).entity(jsonError).build();
+    }
+
+    Projects createdProject = repository.insertProject(newProject, profileId);
+    if (createdProject == null) {
+      JsonObject jsonError = Json.createObjectBuilder()
+          .add("error", "Failed to create a new project")
+          .build();
+      return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(jsonError).build();
+    }
+
+    JsonObject projectJson = Json.createObjectBuilder()
+        .add("id", createdProject.getId())
+        .add("name", createdProject.getName())
+        // ... add other project details
+        .build();
+
+    JsonObject jsonResponse = Json.createObjectBuilder()
+        .add("success", true)
+        .add("message", "Project created successfully")
+        .add("project", projectJson)
+        .build();
+
+    return Response.status(Response.Status.CREATED).entity(jsonResponse).build();
+  }
+
+  private int extractProfileIdFromToken(String token) {
+    // Implement the logic to parse the token and extract the profile ID
+    // For demonstration purposes, we'll return a dummy profile ID
+    // Replace this with your actual token parsing logic
+    return 123;
+  }
+
+  private boolean isValidToken(String token) {
+    // Implement your token validation logic here
+    // For demonstration purposes, we'll assume the token is always valid
+    return true;
+  }
+
+  private boolean validateProject(Project project) {
+    // Implement your project validation logic here
+    // For example, check if the project name is not empty
+    return project.getName() != null && !project.getName().trim().isEmpty();
+  }
+}

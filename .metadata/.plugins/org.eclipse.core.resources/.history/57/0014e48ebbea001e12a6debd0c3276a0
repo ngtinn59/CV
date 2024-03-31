@@ -1,0 +1,38 @@
+import javax.ws.rs.HeaderParam;
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+
+@Path("/authenticated-url")
+public class ProjectResource {
+
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getHelloMessage(@HeaderParam("Authorization") String authorizationHeader) {
+        // Kiểm tra xác thực token
+        if (!isAuthenticated(authorizationHeader)) {
+            return Response.status(Response.Status.UNAUTHORIZED).build();
+        }
+
+        // Trả về một JSON chứa thông điệp "hello"
+        return Response.ok().entity("{\"message\": \"hello\"}").build();
+    }
+
+    // Hàm kiểm tra xác thực token
+    private boolean isAuthenticated(String authorizationHeader) {
+        // Kiểm tra xem token có được gửi trong header "Authorization" không
+        if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
+            return false;
+        }
+        
+        // Trích xuất token từ header
+        String token = authorizationHeader.substring(7); // Bỏ qua "Bearer " ở đầu
+
+        // Thực hiện logic kiểm tra tính hợp lệ của token ở đây
+        
+        // Ví dụ: Nếu token không rỗng, coi là hợp lệ
+        return !token.isEmpty();
+    }
+}

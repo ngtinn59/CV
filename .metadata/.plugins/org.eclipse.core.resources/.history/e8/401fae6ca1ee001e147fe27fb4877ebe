@@ -1,0 +1,90 @@
+package ctu.cit;
+
+import java.sql.Connection;
+import java.sql.Date;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
+
+public class EducationRepository {
+
+    Connection conn = null;
+
+    public EducationRepository() {
+        String user_name = "postgres";
+        String password = "123";
+        try {
+            Class.forName("org.postgresql.Driver");
+            conn = DriverManager.getConnection("jdbc:postgresql://localhost:5432/cse", user_name, password);
+            System.out.println("Ket noi thanh cong!");
+        } catch (Exception e) {
+            System.out.println("Kết nối đến cơ sở dữ liệu thất bại: " + e.getMessage());
+        }
+    }
+
+    public Education insertProject(Education education, int profilesId) {
+        String sql = "INSERT INTO public.projects(" +
+                "title, description, profiles_id, start_date, end_date)" +
+                "VALUES (?, ?, ?, ?, ?)" +
+                "RETURNING *";
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, education.getDegree());
+            pstmt.setString(2, education.getInstitution());
+            pstmt.setInt(3, profilesId);
+            pstmt.setDate(4, Date.valueOf(project.getStartDate()));
+            pstmt.setDate(5, Date.valueOf(project.getEndDate()));
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    Education insertedEducations = new Education();
+                    insertedEducations.setId(rs.getInt("id"));
+                    insertedEducations.setTitle(rs.getString("title"));
+                    insertedEducations.setDescription(rs.getString("description"));
+                    insertedEducations.setProfile(rs.getInt("profiles_id"));
+                    insertedEducations.setStartDate(rs.getDate("start_date").toString());
+                    insertedEducations.setEndDate(rs.getDate("end_date").toString());
+                    return insertedEducations;
+                } else {
+                    throw new SQLException("Insertion failed");
+                }
+            }
+        } catch (SQLException e) {
+            System.out.println("Error while inserting project into the database: " + e.getMessage());
+            return null;
+        }
+    }
+
+    public List<Education> getAllProjectsByProfileId(int profileId) {
+        List<Education> projects = new ArrayList<>();
+
+        String sql = "SELECT * FROM public.projects WHERE profiles_id = ?";
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, profileId);
+            try (ResultSet rs = pstmt.executeQuery()) {
+                while (rs.next()) {
+                    Education project = new Education();
+                    project.setId(rs.getInt("id"));
+                    project.setTitle(rs.getString("title"));
+                    project.setDescription(rs.getString("description"));
+                    project.setProfile(rs.getInt("profiles_id"));
+                    project.setStartDate(rs.getString("start_date"));
+                    project.setEndDate(rs.getString("end_date"));
+
+                    projects.add(project);
+                }
+            }
+        } catch (SQLException e) {
+            System.out.println("Error while retrieving projects from the database: " + e.getMessage());
+        }
+
+        return projects;
+    }
+
+    public Education getProjectById(int projectId, int profileId) {
+        Education project = null;
+
+        String sql = "SELECT id, title, description, profiles_id, start_date, end_date " +
+                "FROM public.projects WHERE id = ? AND profiles_id = ?";
+        try (PreparedStatement pstmt

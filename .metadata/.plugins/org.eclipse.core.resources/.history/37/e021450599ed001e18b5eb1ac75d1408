@@ -1,0 +1,30 @@
+package cit.ctu;
+import java.sql.Connection;
+import java.sql.Date;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
+
+public class KhachHangDatabase {
+
+    Connection conn = null;
+
+    public KhachHangDatabase() {
+        String user_name = "postgres";
+        String password = "123";
+        try {
+            Class.forName("org.postgresql.Driver");
+            conn = DriverManager.getConnection("jdbc:postgresql://localhost:5432/cse", user_name, password);
+            System.out.println("Ket noi thanh cong!");
+        } catch (Exception e) {
+            System.out.println("Kết nối đến cơ sở dữ liệu thất bại: " + e.getMessage());
+        }
+    }
+
+    
+
+    
+}

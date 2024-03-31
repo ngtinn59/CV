@@ -1,0 +1,88 @@
+package cit.ctu;
+
+import java.sql.SQLException;
+import java.util.List;
+
+import javax.enterprise.inject.Produces;
+import javax.json.Json;
+import javax.json.JsonObject;
+import javax.websocket.server.PathParam;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+
+@Path("/register2")
+public class KhachHangRestService {
+    private KhachHangResponsitory repository = new KhachHangResponsitory();
+
+    @POST
+    @Consumes(MediaType.APPLICATION_JSON)
+    public Response addKhachHang(KhachHang khachang) throws SQLException {
+        if (khachang == null) {
+            JsonObject jsonResponse = Json.createObjectBuilder()
+                    .add("status_code", 400)
+                    .add("message", "User object is null.")
+                    .build();
+            return Response.status(Response.Status.BAD_REQUEST).entity(jsonResponse).build();
+        }
+
+        repository.insertUser(khachang);
+        JsonObject jsonResponse = Json.createObjectBuilder()
+                .add("message", "Registration successful.")
+                .build();
+
+        return Response.ok().entity(jsonResponse).build();
+    }
+
+    @GET
+    public Response getAllCustomers() {
+        List<KhachHang> customers = repository.getAllCustomers();
+
+        if (customers.isEmpty()) {
+            JsonObject jsonResponse = Json.createObjectBuilder()
+                    .add("status_code", 404)
+                    .add("message", "No customers found.")
+                    .build();
+            return Response.status(Response.Status.NOT_FOUND).entity(jsonResponse).build();
+        }
+
+        return Response.ok().entity(customers).build();
+    }
+    @GET
+    @Path("/customers/{id}")
+    public Response getCustomerById(@PathParam("id") int customerId) {
+        KhachHang customer = repository.getCustomerById(customerId);
+
+        if (customer == null) {
+            JsonObject jsonResponse = Json.createObjectBuilder()
+                    .add("status_code", 404)
+                    .add("message", "Customer not found.")
+                    .build();
+            return Response.status(Response.Status.NOT_FOUND).entity(jsonResponse).build();
+        }
+
+        return Response.ok().entity(customer).build();
+    }
+    @DELETE
+    @Path("/{customerId}")
+    public Response deleteCustomer(@PathParam("customerId") int customerId) {
+        boolean deleted = repository.deleteCustomerById(customerId);
+
+        if (deleted) {
+            JsonObject jsonResponse = Json.createObjectBuilder()
+                    .add("message", "Customer deleted successfully.")
+                    .build();
+            return Response.ok().entity(jsonResponse).build();
+        } else {
+            JsonObject jsonResponse = Json.createObjectBuilder()
+                    .add("status_code", 404)
+                    .add("message", "Customer not found.")
+                    .build();
+            return Response.status(Response.Status.NOT_FOUND).entity(jsonResponse).build();
+        }
+    }
+}

@@ -1,0 +1,46 @@
+package ctu.cit;
+
+import javax.json.Json;
+import javax.json.JsonObject;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.GET;
+import javax.ws.rs.HeaderParam;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+
+@Path("/projects")
+public class ProjectResource {
+
+    @POST
+    @Consumes(MediaType.APPLICATION_JSON)
+    public Response createProject(Project project, @HeaderParam("Authorization") String authorizationHeader) {
+        // Kiểm tra mã thông báo xác thực
+        if (!isValidToken(authorizationHeader)) {
+            JsonObject jsonError = Json.createObjectBuilder()
+                    .add("error", "Unauthorized")
+                    .build();
+            return Response.status(Response.Status.UNAUTHORIZED).entity(jsonError).build();
+        }
+        
+        // Thực hiện logic tạo dự án
+        // Ví dụ:
+        // projectRepository.createProject(project);
+        
+//        JsonObject jsonResponse = Json.createObjectBuilder()
+//                .add("message", "Project created successfully")
+//                .add("project", project.getName()) // Thay thế project.getName() bằng thông tin dự án thực tế
+//                .build();
+
+        return Response.ok().entity(jsonResponse).build();
+    }
+
+    private boolean isValidToken(String authorizationHeader) {
+        // Thực hiện kiểm tra mã thông báo xác thực
+        // Nếu mã thông báo hợp lệ, trả về true; ngược lại, trả về false
+        // Ví dụ:
+        // return tokenService.isValidToken(authorizationHeader);
+        return true; // Đây là một ví dụ đơn giản, bạn cần thay thế bằng logic xác thực thực tế
+    }
+}

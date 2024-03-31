@@ -1,0 +1,53 @@
+package cit.ctu;
+
+import java.sql.SQLException;
+import java.util.List;
+
+import javax.enterprise.inject.Produces;
+import javax.json.Json;
+import javax.json.JsonObject;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+
+@Path("/register")
+public class KhachHangRestService {
+    private KhachHangResponsitory repository = new KhachHangResponsitory();
+
+    @POST
+    @Consumes(MediaType.APPLICATION_JSON)
+    public Response addKhachHang(KhachHang user) throws SQLException {
+        if (user == null) {
+            JsonObject jsonResponse = Json.createObjectBuilder()
+                    .add("status_code", 400)
+                    .add("message", "User object is null.")
+                    .build();
+            return Response.status(Response.Status.BAD_REQUEST).entity(jsonResponse).build();
+        }
+
+        repository.insertUser(user);
+        JsonObject jsonResponse = Json.createObjectBuilder()
+                .add("message", "Registration successful.")
+                .build();
+
+        return Response.ok().entity(jsonResponse).build();
+    }
+
+    @GET
+    public Response getAllCustomers() {
+        List<KhachHang> customers = repository.getAllCustomers();
+
+        if (customers.isEmpty()) {
+            JsonObject jsonResponse = Json.createObjectBuilder()
+                    .add("status_code", 404)
+                    .add("message", "No customers found.")
+                    .build();
+            return Response.status(Response.Status.NOT_FOUND).entity(jsonResponse).build();
+        }
+
+        return Response.ok().entity(customers).build();
+    }
+}

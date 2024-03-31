@@ -1,0 +1,97 @@
+package ctu.cit;
+import java.sql.Connection;
+import java.sql.Date;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
+
+public class ProjectRepository {
+
+    Connection conn = null;
+
+    public ProjectRepository() {
+        String user_name = "postgres";
+        String password = "123";
+        try {
+            Class.forName("org.postgresql.Driver");
+            conn = DriverManager.getConnection("jdbc:postgresql://localhost:5432/cse", user_name, password);
+            System.out.println("Ket noi thanh cong!");
+        } catch (Exception e) {
+            System.out.println("Kết nối đến cơ sở dữ liệu thất bại: " + e.getMessage());
+        }
+    }
+    public Projects insertProject(Projects project, int profilesId) {
+    	  String sql = "INSERT INTO public.projects(\r\n" +
+    	               "  id, title, description, profiles_id, start_date, end_date)\r\n" +
+    	               "VALUES (?, ?, ?, ?, ?, ?)\r\n" +
+    	               "RETURNING *";
+    	  try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+    	    pstmt.setInt(1, project.getId());
+    	    pstmt.setString(2, project.getTitle());
+    	    pstmt.setString(3, project.getDescription());
+    	    pstmt.setInt(4, profilesId);
+    	    pstmt.setString(5, project.getStartDate());
+    	    pstmt.setString(6, project.getEndDate());
+    	    try (ResultSet rs = pstmt.executeQuery()) {
+    	      if (rs.next()) {
+    	        Projects insertedProject = new Projects();
+    	        insertedProject.setId(rs.getInt("id"));
+    	        insertedProject.setTitle(rs.getString("title"));
+    	        insertedProject.setDescription(rs.getString("description"));
+    	        insertedProject.setProfile(rs.getInt("profiles_id"));
+    	        insertedProject.setStartDate(rs.getString("start_date"));
+    	        insertedProject.setEndDate(rs.getString("end_date"));
+    	        return insertedProject;
+    	      } else {
+    	        throw new SQLException("Insertion failed");
+    	      }
+    	    }
+    	  } catch (SQLException e) {
+    	    System.out.println("Error while inserting project into the database: " + e.getMessage());
+    	    return null;
+    	  }
+    	}
+    public List<Projects> getAllProjects() {
+        List<Projects> projects = new ArrayList<>();
+
+        String sql = "SELECT * FROM public.projects";
+        try (PreparedStatement pstmt = conn.prepareStatement(sql);
+             ResultSet rs = pstmt.executeQuery()) {
+          while (rs.next()) {
+            Projects project = new Projects();
+            project.setId(rs.getInt("id"));
+            project.setTitle(rs.getString("title"));
+            project.setDescription(rs.getString("description"));
+            project.setProfile((rs.getInt("profiles_id")));
+            project.setStartDate(rs.getString("start_date"));
+            project.setEndDate(rs.getString("end_date"));
+
+            projects.add(project);
+          }
+        } catch (SQLException e) {
+          System.out.println("Error while retrieving projects from the database: " + e.getMessage());
+        }
+
+        return projects;
+      }
+    
+    public static void main(String[] args) {
+    	  ProjectRepository repo = new ProjectRepository();
+    	  Projects project = new Projects();
+    	  project.setId(1);
+    	  project.setTitle("My Project");
+    	  project.setDescription("This is my project");
+    	  project.setStartDate("2022-01-01");
+    	  project.setEndDate("2022-12-31");
+    	  int profilesId = 1; // The ID of the profile associated with the project
+    	  Projects insertedProject = repo.insertProject(project, profilesId);
+    	  if (insertedProject != null) {
+    	    System.out.println("Project inserted successfully: " + insertedProject.getTitle());
+    	  } else {
+    	    System.out.println("Error inserting project");
+    	  }
+    	}
+}

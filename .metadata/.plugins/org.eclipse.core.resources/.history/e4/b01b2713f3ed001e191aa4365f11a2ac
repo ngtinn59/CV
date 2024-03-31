@@ -1,0 +1,43 @@
+package ctu.cit;
+import java.sql.Connection;
+import java.sql.Date;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
+
+public class ProjectRepository {
+
+    Connection conn = null;
+
+    public ProjectRepository() {
+        String user_name = "postgres";
+        String password = "123";
+        try {
+            Class.forName("org.postgresql.Driver");
+            conn = DriverManager.getConnection("jdbc:postgresql://localhost:5432/cse", user_name, password);
+            System.out.println("Ket noi thanh cong!");
+        } catch (Exception e) {
+            System.out.println("Kết nối đến cơ sở dữ liệu thất bại: " + e.getMessage());
+        }
+    }
+
+    public void insertProject(Projects project, int profilesId) {
+    	  // Your SQL statement now no longer requires the profile object
+    	  String sql = "INSERT INTO public.projects(id, title, start_date, end_date, description, profiles_id) VALUES (?, ?, ?, ?, ?, ?);";
+    	  try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+    	    pstmt.setInt(1, project.getId());
+    	    pstmt.setString(2, project.getTitle());
+    	    pstmt.setDate(3, new java.sql.Date(project.getStartDate().getTime()));
+    	    pstmt.setDate(4, new java.sql.Date(project.getEndDate().getTime()));
+    	    pstmt.setString(5, project.getDescription());
+    	    pstmt.setInt(6, profilesId); // Use the profilesId parameter directly
+    	    // ... execute update and handle results ...
+    	  } catch (SQLException e) {
+    	    System.out.println("Error while inserting project into the database: " + e.getMessage());
+    	  }
+    	}
+
+}

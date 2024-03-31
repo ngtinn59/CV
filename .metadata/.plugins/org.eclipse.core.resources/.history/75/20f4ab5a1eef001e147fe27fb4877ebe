@@ -1,0 +1,155 @@
+package ctu.cit;
+
+import java.sql.Connection;
+import java.sql.Date;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.List;
+
+public class AboutmeRepository {
+
+    Connection conn = null;
+
+    public AboutmeRepository() {
+        String user_name = "postgres";
+        String password = "123";
+        try {
+            Class.forName("org.postgresql.Driver");
+            conn = DriverManager.getConnection("jdbc:postgresql://localhost:5432/cse", user_name, password);
+            System.out.println("Ket noi thanh cong!");
+        } catch (Exception e) {
+            System.out.println("KÃ¡ÂºÂ¿t nÃ¡Â»â€˜i Ã„â€˜Ã¡ÂºÂ¿n cÃ†Â¡ sÃ¡Â»Å¸ dÃ¡Â»Â¯ liÃ¡Â»â€¡u thÃ¡ÂºÂ¥t bÃ¡ÂºÂ¡i: " + e.getMessage());
+        }
+    }
+
+    public Aboutme insertEducation(Aboutme education, int profilesId) {
+        String sql = "INSERT INTO public.aboutme(\r\n" + 
+        		"	profiles_id, description)\r\n" + 
+        		"	VALUES ( ?, ?)" +
+                "RETURNING id"; 
+
+        try (PreparedStatement pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+            pstmt.setInt(1, profilesId);
+            pstmt.setString(2, education.getDescription());
+            int affectedRows = pstmt.executeUpdate();
+            if (affectedRows == 0) {
+                throw new SQLException("Insertion failed, no rows affected.");
+            }
+
+            try (ResultSet rs = pstmt.getGeneratedKeys()) {
+                if (rs.next()) {
+                    int id = rs.getInt(1);
+                    education.setId(id);
+                    return education;
+                } else {
+                    throw new SQLException("Insertion failed, no ID obtained.");
+                }
+            }
+        } catch (SQLException e) {
+            System.out.println("Error while inserting education into the database: " + e.getMessage());
+            return null;
+        }
+    }
+
+    public List<Aboutme> getAllAboutmeByProfileId(int profileId) {
+        List<Education> educations = new ArrayList<>();
+        
+        String sql = "SELECT * FROM public.educations WHERE profiles_id = ?";
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, profileId);
+            try (ResultSet rs = pstmt.executeQuery()) {
+                while (rs.next()) {
+                    Education education = new Education();
+                    education.setId(rs.getInt("id"));
+                    education.setDegree(rs.getString("degree"));
+                    education.setInstitution(rs.getString("institution"));
+                    education.setStartDate(rs.getString("start_date"));
+                    education.setEndDate(rs.getString("end_date"));
+                    education.setAdditionalDetail(rs.getString("additionaldetail"));
+                    
+                    educations.add(education);
+                }
+            }
+        } catch (SQLException e) {
+            System.out.println("Error while retrieving educations from the database: " + e.getMessage());
+        }
+        
+        return educations;
+    }
+
+    public Education getEducationById(int educationId, int profileId) {
+        Education education = null;
+        
+        String sql = "SELECT id, degree, institution, additionaldetail, start_date, end_date " +
+                     "FROM public.educations WHERE id = ? AND profiles_id = ?";
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, educationId);
+            pstmt.setInt(2, profileId);
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    education = new Education();
+                    education.setId(rs.getInt("id"));
+                    education.setDegree(rs.getString("degree"));
+                    education.setInstitution(rs.getString("institution"));
+                    education.setAdditionalDetail(rs.getString("additionaldetail"));
+                    education.setStartDate(rs.getString("start_date"));
+                    education.setEndDate(rs.getString("end_date"));
+                }
+            }
+        } catch (SQLException e) {
+            System.out.println("Error while retrieving education from the database: " + e.getMessage());
+        }
+        
+        return education;
+    }
+    
+   
+    public Aboutme updateAboutme(Aboutme aboutme) {
+        String sql = "UPDATE public.aboutme\r\n" + 
+        		"	SET id=?, profiles_id=?, description=?\r\n" + 
+        		"	WHERE id = ?" +
+                     "RETURNING *";
+
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, aboutme.getDescription());
+            pstmt.setInt(6, aboutme.getId());
+
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                	Aboutme updateAboutme = new Aboutme();
+                	updateAboutme.setId(rs.getInt("id"));
+                	updateAboutme.setDescription(rs.getString("description"));
+                   
+                    return updateAboutme;
+                } else {
+                    throw new SQLException("Update failed");
+                }
+            }
+        } catch (SQLException e) {
+            System.out.println("Error while updating Aboutme in the database: " + e.getMessage());
+            return null;
+        }
+    }
+
+    public boolean deleteEducation(int aboutmeId) {
+        String sql = "DELETE FROM public.aboutme WHERE id = ?";
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, aboutmeId);
+            int rowsAffected = pstmt.executeUpdate();
+            return rowsAffected > 0;
+        } catch (SQLException e) {
+            System.out.println("Error while deleting education from the database: " + e.getMessage());
+            return false;
+        }
+    }
+
+  
+    public static void main(String[] args) {
+       
+    }
+
+}

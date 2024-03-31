@@ -1,0 +1,86 @@
+package ctu.cit;
+
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.HttpHeaders;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.PathParam;
+import javax.json.Json;
+import javax.json.JsonObject;
+import javax.json.JsonObjectBuilder;
+import javax.json.JsonValue;
+
+// Make sure this class is mapped to /profiles
+@Path("/profiles")
+public class ProfileRespone {
+
+    private UserResponsitory repository = new UserResponsitory();
+
+    // Define the GET method for /profiles/{userId}
+    @GET
+    @Path("/{userId}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response showProfile(@PathParam("userId") int userId, @Context HttpHeaders headers) {
+        // Retrieve the token from the request headers
+        String token = headers.getHeaderString("Authorization");
+
+        // Validate the token
+        if (token == null || !isValidToken(token)) {
+            JsonObject jsonError = Json.createObjectBuilder()
+                .add("error", "Unauthorized access")
+                .build();
+            return Response.status(Response.Status.UNAUTHORIZED).entity(jsonError).build();
+        }
+
+        // Extract the user email from the token
+        String userEmail = extractEmailFromToken(token);
+
+        // Retrieve the user by email
+        User user = repository.getUserByEmail(userEmail);
+
+        // Check if the user exists and matches the requested userId
+        if (user == null || user.getId() != userId) {
+            JsonObject jsonError = Json.createObjectBuilder()
+                .add("error", "User not found or unauthorized to access this profile")
+                .build();
+            return Response.status(Response.Status.NOT_FOUND).entity(jsonError).build();
+        }
+
+        // Retrieve the profile by userId
+        Profile profile = repository.getProfileByUserId(userId);
+
+        // Check if the profile exists
+        if (profile == null) {
+            JsonObject jsonError = Json.createObjectBuilder()
+                .add("error", "Profile not found")
+                .build();
+            return Response.status(Response.Status.NOT_FOUND).entity(jsonError).build();
+        }
+
+        // Construct the JSON response
+        JsonObject jsonResponse = Json.createObjectBuilder()
+            .add("👤 Name", profile.getName())
+            .add("📝 Title", profile.getTitle())
+            // Add other profile fields as needed
+            .build();
+
+        return Response.ok(jsonResponse).build();
+    }
+
+    // Method to validate the token (implement your logic here)
+    private boolean isValidToken(String token) {
+        // Implement your token validation logic here
+        // Return true if the token is valid, false otherwise
+        return true; // For demonstration purposes, assuming token is always valid
+    }
+
+    // Method to extract user email from the token (implement your logic here)
+    private String extractEmailFromToken(String token) {
+        // Implement your token parsing logic here
+        // Return the user email extracted from the token
+        return "user@example.com"; // For demonstration purposes, returning a dummy email
+    }
+}

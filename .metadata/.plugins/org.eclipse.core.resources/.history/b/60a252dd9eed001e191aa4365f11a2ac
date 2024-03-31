@@ -1,0 +1,40 @@
+package cit.ctu;
+
+import java.sql.SQLException;
+
+import javax.json.Json;
+import javax.json.JsonObject;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+
+import ctu.cit.UserResponsitory;
+
+public class KhachHangRestService {
+    private KhachHangResponsitory repository = new KhachHangResponsitory();
+
+    @POST
+    @Path("/register")
+    @Consumes(MediaType.APPLICATION_JSON)
+    public Response addKhachHang(KhachHang user) throws SQLException {
+        // Insert user
+        repository.insertUser(user);
+
+        JsonObject userJson = Json.createObjectBuilder()
+                .add("mso", user.getMso())
+                .add("hoten", user.getHoten())
+                .add("diachi", user.getDiachi())
+                .add("gtinh", user.getGtinh())
+                .build();
+
+        JsonObject jsonResponse = Json.createObjectBuilder()
+                .add("user", userJson)
+                .add("status_code", 200)
+                .add("message", "Registration successful.")
+                .build();
+
+        return Response.ok().entity(jsonResponse).build();
+    }
+}

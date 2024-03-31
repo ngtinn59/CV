@@ -1,0 +1,64 @@
+package ctu.cit;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
+
+public class UserResponsitory {
+
+    Connection conn = null;
+
+    public UserResponsitory() {
+        String user_name = "postgres";
+        String password = "123";
+        try {
+            Class.forName("org.postgresql.Driver");
+            conn = DriverManager.getConnection("jdbc:postgresql://localhost:5432/cse", user_name, password);
+            System.out.println("Ket noi thanh cong!");
+        } catch (Exception e) {
+            System.out.println("Kết nối đến cơ sở dữ liệu thất bại: " + e.getMessage());
+        }
+    }
+
+    public void insertUser(User user) {
+        String sql = "INSERT INTO users1 (name, password, title, about, phone, email, linkedin_url) VALUES (?, ?, ?, ?, ?, ?, ?)";
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, user.getName());
+            pstmt.setString(2, user.getPassword());
+            pstmt.setString(3, user.getTitle());
+            pstmt.setString(4, user.getAbout());
+            pstmt.setString(5, user.getPhone());
+            pstmt.setString(6, user.getEmail());
+            pstmt.setString(7, user.getLinkedin_url());
+
+            int rowsAffected = pstmt.executeUpdate();
+            if (rowsAffected > 0) {
+                System.out.println("Người dùng được thêm vào cơ sở dữ liệu thành công!");
+            } else {
+                System.out.println("Thêm người dùng vào cơ sở dữ liệu không thành công!");
+            }
+        } catch (SQLException e) {
+            System.out.println("Lỗi khi thêm người dùng vào cơ sở dữ liệu: " + e.getMessage());
+        }
+    }
+
+    public static void main(String[] args) {
+        UserResponsitory repository = new UserResponsitory();
+
+        // Tạo một đối tượng User mới
+        User newUser = new User();
+        newUser.setName("John Doe");
+        newUser.setPassword("password123");
+        newUser.setTitle("Software Engineer");
+        newUser.setAbout("I am a software engineer with 5 years of experience.");
+        newUser.setPhone("1234567890");
+        newUser.setEmail("john@example.com");
+        newUser.setLinkedin_url("http://linkedin.com/in/johndoe");
+
+        // Insert người dùng mới vào cơ sở dữ liệu
+        repository.insertUser(newUser);
+    }
+}

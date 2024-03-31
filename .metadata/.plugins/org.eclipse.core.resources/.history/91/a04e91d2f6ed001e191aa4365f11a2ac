@@ -1,0 +1,72 @@
+package ctu.cit;
+import java.sql.Connection;
+import java.sql.Date;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
+
+public class ProjectRepository {
+
+    Connection conn = null;
+
+    public ProjectRepository() {
+        String user_name = "postgres";
+        String password = "123";
+        try {
+            Class.forName("org.postgresql.Driver");
+            conn = DriverManager.getConnection("jdbc:postgresql://localhost:5432/cse", user_name, password);
+            System.out.println("Ket noi thanh cong!");
+        } catch (Exception e) {
+            System.out.println("Kết nối đến cơ sở dữ liệu thất bại: " + e.getMessage());
+        }
+    }
+
+    public Projects insertProject(Projects project, int profilesId) {
+    	  // Your SQL statement now no longer requires the profile object
+    	  String sql = "INSERT INTO public.projects(\r\n" + 
+    	  		"	id, title, description, profiles_id, start_date, end_date)\r\n" + 
+    	  		"	VALUES (?, ?, ?, ?, ?, ?)";
+    	  try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+    	    pstmt.setInt(1, project.getId());
+    	    pstmt.setString(2, project.getTitle());
+    	    pstmt.setString(3, project.getDescription());
+    	    pstmt.setInt(4, profilesId);
+    	    pstmt.setString(5, project.getStartDate());
+    	    pstmt.setInt(6, project.getEndDate()); // Use the profilesId parameter directly
+    	    // ... execute update and handle results ...
+    	  } catch (SQLException e) {
+    	    System.out.println("Error while inserting project into the database: " + e.getMessage());
+    	  }
+		return project;
+    	}
+    
+    
+    public static void main(String[] args) {
+        // Assuming you have a valid Projects object to insert
+        Projects newProject = new Projects();
+        newProject.setId(1);
+        newProject.setTitle("Sample Project");
+        newProject.setStartDate("22/3/1");
+        newProject.setEndDate("22/1/3");
+        newProject.setDescription("This is a sample project");
+
+        // Assuming you have a valid profilesId to associate with the project
+        int profilesId = 36; // Replace with the actual profilesId
+
+        // Create an instance of ProjectRepository
+        ProjectRepository repository = new ProjectRepository();
+
+        // Insert the project into the database
+        Projects createdProject = repository.insertProject(newProject, profilesId);
+        if (createdProject != null) {
+          System.out.println("Project created successfully with ID: " + createdProject.getId());
+        } else {
+          System.out.println("Failed to create the project");
+        }
+      }
+    
+
+}

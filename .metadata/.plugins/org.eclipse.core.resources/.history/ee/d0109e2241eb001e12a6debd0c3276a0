@@ -1,0 +1,47 @@
+package ctu.cit;
+
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.core.Response;
+import javax.json.Json;
+import javax.json.JsonObject;
+import javax.json.JsonValue;
+
+// Đảm bảo rằng lớp này được đường dẫn /profiles
+@Path("/profiles")
+public class ProfileRespone {
+
+  private UserResponsitory repository = new UserResponsitory();
+
+  // Định nghĩa phương thức GET cho /profiles/{userId}
+  @GET
+  @Path("/{userId}")
+  @Produces(MediaType.APPLICATION_JSON) // Trả về JSON
+  public Response showProfile(@PathParam("userId") int userId) {
+    Profile profile = repository.getProfileByUserId(userId);
+
+    if (profile == null) {
+      JsonObject jsonError = Json.createObjectBuilder()
+          .add("error", "Oops! Profile not found. Maybe it's hiding in a parallel universe?")
+          .build();
+      return Response.status(Response.Status.NOT_FOUND).entity(jsonError).build();
+    }
+
+    JsonObject jsonResponse = Json.createObjectBuilder()
+        .add("👤 Name", profile.getName())
+        .add("📝 Title", profile.getTitle())
+        .add("📞 Phone", profile.getPhone())
+        .add("📧 Email", profile.getEmail())
+        .add("🎂 Birthday", (JsonValue) profile.getBirthday())
+        .add("🖼️ Image", profile.getImage())
+        .add("⚧️ Gender", profile.getGender() ? "Male" : "Female")
+        .add("📍 Location", profile.getLocation())
+        .add("🌐 Website", profile.getWebsite())
+        .build();
+
+    return Response.ok(jsonResponse).build();
+  }
+}

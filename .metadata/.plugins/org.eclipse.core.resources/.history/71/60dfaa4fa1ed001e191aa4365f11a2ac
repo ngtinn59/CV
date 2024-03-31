@@ -1,0 +1,64 @@
+package cit.ctu;
+import java.sql.Connection;
+import java.sql.Date;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
+
+public class KhachHangResponsitory {
+
+    Connection conn = null;
+
+    public KhachHangResponsitory() {
+        String user_name = "postgres";
+        String password = "123";
+        try {
+            Class.forName("org.postgresql.Driver");
+            conn = DriverManager.getConnection("jdbc:postgresql://localhost:5432/cse", user_name, password);
+            System.out.println("Ket noi thanh cong!");
+        } catch (Exception e) {
+            System.out.println("Kết nối đến cơ sở dữ liệu thất bại: " + e.getMessage());
+        }
+    }
+
+    public void insertUser(KhachHang user) {
+        String sql = "INSERT INTO khach_hang (mso, hoten, diachi, gtinh) VALUES (?, ?, ?, ?)";
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+          pstmt.setInt(1, user.getMso());
+          pstmt.setString(2, user.getHoten());
+          pstmt.setString(3, user.getDiachi());
+          pstmt.setString(4, user.getGtinh());
+
+          int rowsAffected = pstmt.executeUpdate();
+          if (rowsAffected > 0) {
+            System.out.println("Người dùng được thêm vào cơ sở dữ liệu thành công!");
+          } else {
+            System.out.println("Thêm người dùng vào cơ sở dữ liệu không thành công!");
+          }
+        } catch (SQLException e) {
+          System.out.println("Lỗi khi thêm người dùng vào cơ sở dữ liệu: " + e.getMessage());
+        }
+      }
+    
+    public static void main(String[] args) {
+        KhachHangResponsitory repository = new KhachHangResponsitory();
+
+        // Create a new user
+        KhachHang user = new KhachHang();
+        user.setMso(123);
+        user.setHoten("John Doe");
+        user.setDiachi("123 Main St");
+        user.setGtinh(true);
+
+        // Insert the user into the database
+        repository.insertUser(user);
+    }
+    
+    } 
+
+
+
+

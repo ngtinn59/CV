@@ -1,0 +1,50 @@
+package ctu.cit;
+
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jws;
+import io.jsonwebtoken.JwtException;
+import io.jsonwebtoken.Jwts;
+import javax.ws.rs.HeaderParam;
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+
+@Path("/authenticated-url")
+public class ProjectResource {
+
+    private static final String BEARER_PREFIX = "Bearer ";
+    private static final String SECRET_KEY = "your-secret-key";
+
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getHelloMessage(@HeaderParam("Authorization") String authorizationHeader) {
+        if (!isAuthenticated(authorizationHeader)) {
+            return Response.status(Response.Status.UNAUTHORIZED)
+                    .entity("{\"error\": \"Unauthorized - Invalid token.\"}")
+                    .build();
+        }
+
+        return Response.ok().entity("{\"message\": \"hello\"}").build();
+    }
+
+    private boolean isAuthenticated(String authorizationHeader) {
+        if (authorizationHeader == null || !authorizationHeader.startsWith(BEARER_PREFIX)) {
+            return false;
+        }
+
+        String token = authorizationHeader.substring(BEARER_PREFIX.length());
+
+        try {
+            Jws<Claims> claims = Jwts.parser()
+                    .setSigningKey(SECRET_KEY)
+                    .parseClaimsJws(token);
+            // Nếu token hợp lệ, trả về true
+            return true;
+        } catch (JwtException | IllegalArgumentException e) {
+            // Nếu bất kỳ lỗi nào xảy ra trong quá trình phân tích token, trả về false
+            return false;
+        }
+    }
+}

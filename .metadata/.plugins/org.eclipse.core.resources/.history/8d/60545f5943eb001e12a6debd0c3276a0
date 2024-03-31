@@ -1,0 +1,72 @@
+package ctu.cit;
+
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.HttpHeaders;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import javax.json.Json;
+import javax.json.JsonObject;
+import javax.json.JsonObjectBuilder;
+import javax.json.JsonValue;
+
+@Path("/profiles")
+public class ProfileRespone {
+
+    private UserResponsitory repository = new UserResponsitory();
+
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response showProfile(@Context HttpHeaders headers) {
+        String token = headers.getHeaderString("Authorization");
+
+        if (token == null || !isValidToken(token)) {
+            JsonObject jsonError = Json.createObjectBuilder()
+                .add("error", "Unauthorized access")
+                .build();
+            return Response.status(Response.Status.UNAUTHORIZED).entity(jsonError).build();
+        }
+
+        String userEmail = extractEmailFromToken(token);
+
+        User user = repository.getUserByEmail(userEmail);
+
+        if (user == null) {
+            JsonObject jsonError = Json.createObjectBuilder()
+                    .add("error", "User not found")
+                    .add("message", "User with the provided email does not exist."+userEmail)
+                    .build();
+            return Response.status(Response.Status.NOT_FOUND).entity(jsonError).build();
+        }
+
+
+        Profile profile = repository.getProfileByUserId(user.getId());
+
+        if (profile == null) {
+            JsonObject jsonError = Json.createObjectBuilder()
+                .add("error", "Profile not found")
+                .build();
+            return Response.status(Response.Status.NOT_FOUND).entity(jsonError).build();
+        }
+
+        JsonObject jsonResponse = Json.createObjectBuilder()
+            .add("👤 Name", profile.getName())
+            .add("📝 Title", profile.getTitle())
+            // Add other profile fields as needed
+            .build();
+
+        return Response.ok(jsonResponse).build();
+    }
+
+    private boolean isValidToken(String token) {
+        // Implement your token validation logic here
+        return true; // For demonstration purposes, assuming token is always valid
+    }
+
+    private String extractEmailFromToken(String token) {
+        // Implement your token parsing logic here
+        return "user@example.com"; // For demonstration purposes, returning a dummy email
+    }
+}

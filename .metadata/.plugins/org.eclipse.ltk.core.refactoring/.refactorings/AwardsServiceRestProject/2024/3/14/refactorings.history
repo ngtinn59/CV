@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<session version="1.0">
+<refactoring comment="Copy package &apos;ctu.cit&apos; to &apos;CertificatesServiceRestProject/src&apos;&#x0D;&#x0A;- Original project: &apos;AwardsServiceRestProject&apos;&#x0D;&#x0A;- Destination element: &apos;CertificatesServiceRestProject/src&apos;&#x0D;&#x0A;- Original element: &apos;AwardsServiceRestProject/src/ctu.cit&apos;" description="Copy package" destination="=CertificatesServiceRestProject/src" element1="/src&lt;ctu.cit" flags="589830" fragments="1" id="org.eclipse.jdt.ui.copy" policy="org.eclipse.jdt.ui.copyPackages" stamp="1711872444303" version="1.0"/>
+</session>

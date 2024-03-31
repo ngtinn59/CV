@@ -1,0 +1,51 @@
+package ctu.cit;
+
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.core.Response;
+import javax.json.Json;
+import javax.json.JsonObject;
+import javax.json.JsonObjectBuilder;
+import javax.json.JsonValue;
+
+// Đảm bảo rằng lớp này được đường dẫn /profiles
+@Path("/profiles")
+public class ProfileRespone {
+
+  private UserResponsitory repository = new UserResponsitory();
+
+  // Định nghĩa phương thức GET cho /profiles/{userId}
+  @GET
+  @Path("/{userId}")
+  public Response showProfile(@PathParam("userId") int userId) {
+	  Profile profile = repository.getProfileByUserId(userId);
+
+	  if (profile == null) {
+	    JsonObject jsonError = Json.createObjectBuilder()
+	        .add("error", "Oops! Profile not found. Maybe it's hiding in a parallel universe?")
+	        .build();
+	    return Response.status(Response.Status.NOT_FOUND).entity(jsonError).build();
+	  }
+
+	  JsonObjectBuilder jsonResponseBuilder = Json.createObjectBuilder();
+
+	  // Add fields to the JSON response, checking for null values
+	  if (profile.getName() != null) {
+	    jsonResponseBuilder.add("👤 Name", profile.getName());
+	  }
+	  if (profile.getTitle() != null) {
+	    jsonResponseBuilder.add("📝 Title", profile.getTitle());
+	  }
+	  // ... Repeat for other fields ...
+
+	  // You can also choose to provide a default value for null fields
+	  jsonResponseBuilder.add("📧 Email", profile.getEmail() != null ? profile.getEmail() : "No email provided");
+
+	  JsonObject jsonResponse = jsonResponseBuilder.build();
+
+	  return Response.ok(jsonResponse).build();
+	}
+}

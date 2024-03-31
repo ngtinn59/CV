@@ -1,0 +1,31 @@
+import javax.json.bind.annotation.JsonbDateFormat;
+import javax.persistence.*;
+import java.time.LocalDate;
+
+@Entity
+@Table(name = "profiles")
+public class Profile {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private int id;
+
+    @ManyToOne
+    @JoinColumn(name = "users_id")
+    private User user;
+
+    private String name;
+    private String title;
+    private String phone;
+    private String email;
+
+    @JsonbDateFormat("yyyy-MM-dd")
+    private LocalDate birthday;
+
+    private String image;
+    private Boolean gender;
+    private String location;
+    private String website;
+
+    // Constructors, getters, and setters
+    // ...
+}
